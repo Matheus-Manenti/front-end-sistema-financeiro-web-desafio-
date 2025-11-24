@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, ChangeEvent } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/dialog'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { Plus, Pencil, Power, Eye } from 'lucide-react'
-import api, { createClient, updateClient, updateClientStatus, toggleOrderPayment, toggleClientFinancialStatus, getAllUsers, getAllClients } from '@/lib/api'
+import api, { createClient, updateClient, updateClientStatus, toggleOrderPayment, toggleClientFinancialStatus } from '@/lib/api'
 
 type Ordem = {
   id: number
@@ -99,34 +99,6 @@ export default function DashboardPage() {
     telefone: '',
   })
   const [addError, setAddError] = useState<string | null>(null)
-  const [emailChecking, setEmailChecking] = useState(false)
-  const [emailDuplicate, setEmailDuplicate] = useState(false)
- 
-  useEffect(() => {
-    const email = formData.email?.toLowerCase?.().trim?.();
-    if (!email) {
-      setEmailDuplicate(false)
-      setEmailChecking(false)
-      return
-    }
-
-    setEmailChecking(true)
-    const handler = setTimeout(async () => {
-      try {
-        const [allUsers, allClients] = await Promise.all([getAllUsers(), getAllClients()])
-        const existsInUsers = allUsers.some((u: any) => String(u.email).toLowerCase() === email && (!editingCliente || String(u.id) !== String(editingCliente.id)))
-        const existsInClients = allClients.some((c: any) => String(c.email).toLowerCase() === email)
-        setEmailDuplicate(existsInUsers || existsInClients)
-      } catch (e) {
-      
-        setEmailDuplicate(false)
-      } finally {
-        setEmailChecking(false)
-      }
-    }, 500)
-
-    return () => clearTimeout(handler)
-  }, [formData.email, editingCliente])
 
   const handleAddOrEdit = async () => {
     setAddError(null);
@@ -311,7 +283,6 @@ export default function DashboardPage() {
         }),
       });
 
-      // Log da resposta da API
       console.log('Resposta da API:', response);
 
       if (!response.ok) {
@@ -384,31 +355,24 @@ export default function DashboardPage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                    <Label htmlFor="nome">Nome</Label>
-                    <Input
-                      id="nome"
-                      value={formData.nome}
-                      onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                      placeholder="Nome completo"
-                    />
-                  </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setFormData({ ...formData, email: e.target.value })
-                        setEmailDuplicate(false)
-                      }}
-                      placeholder="email@exemplo.com"
-                    />
-                    <p className="text-sm mt-1">
-                      {emailChecking && <span className="text-amber-600">Verificando email...</span>}
-                      {!emailChecking && emailDuplicate && <span className="text-red-600">Este e-mail já está em uso por outro usuário ou cliente.</span>}
-                    </p>
-                  </div>
+                  <Label htmlFor="nome">Nome</Label>
+                  <Input
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    placeholder="Nome completo"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="telefone">Telefone</Label>
                   <Input
@@ -470,7 +434,7 @@ export default function DashboardPage() {
                 </div>
               )}
               <DialogFooter>
-                <Button onClick={handleAddOrEdit} disabled={emailChecking || emailDuplicate}>
+                <Button onClick={handleAddOrEdit}>
                   {editingCliente ? 'Salvar' : 'Adicionar'}
                 </Button>
                 {editingCliente && (

@@ -1,5 +1,8 @@
 'use client'
 
+'use client'
+
+import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -8,13 +11,21 @@ import { LayoutDashboard, Users, DollarSign, UserCog, LogOut } from 'lucide-reac
 
 const navigation = [
   { name: 'Dashboard Financeiro', href: '/dashboard-financeiro', icon: DollarSign },
-  { name: 'Clientes', href: '/dashboard', icon: Users },
+  { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Usuários', href: '/usuarios', icon: UserCog },
-  { name: 'Admin', href: '/admin', icon: LayoutDashboard },
 ]
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+
+  const [userRole, setUserRole] = React.useState<string | null>(null)
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserRole(localStorage.getItem('userRole'))
+    }
+  }, [])
+  
+  const filteredNavigation = navigation
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,7 +35,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <h2 className="text-lg font-bold text-sidebar-foreground">Sistema Financeiro</h2>
           </div>
           <nav className="flex-1 space-y-1 px-3 py-4">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link key={item.name} href={item.href}>

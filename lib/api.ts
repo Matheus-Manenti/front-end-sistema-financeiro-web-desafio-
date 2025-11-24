@@ -1,3 +1,34 @@
+
+export type UsuarioInput = {
+  name: string;
+  email: string;
+  password?: string;
+  role: string;
+  isActive?: boolean;
+};
+
+export const getAllUsers = async () => {
+  const response = await api.get('/users/list-all');
+  return response.data;
+};
+
+export const createUser = async (userData: UsuarioInput) => {
+  const response = await api.post('/users/create', {
+    ...userData,
+    isActive: userData.isActive ?? true,
+  });
+  return response.data;
+};
+
+export const updateUser = async (id: string, userData: UsuarioInput) => {
+  const response = await api.patch(`/users/update/${id}`, userData);
+  return response.data;
+};
+
+export const toggleUserStatus = async (id: string) => {
+  const response = await api.patch(`/users/update-status/${id}`);
+  return response.data;
+};
 import axios from 'axios';
 
 const api = axios.create({
